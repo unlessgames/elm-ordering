@@ -8,10 +8,10 @@ import Ordering exposing (Ordering)
 
 
 type alias Card =
-    { value : Value, suite : Suite }
+    { value : Value, suit : Suit }
 
 
-type Suite
+type Suit
     = Clubs
     | Hearts
     | Diamonds
@@ -35,12 +35,12 @@ type Value
 
 
 type JokerCard
-    = NormalCard Value Suite
+    = NormalCard Value Suit
     | Joker
 
 
-suiteOrdering : Ordering Suite
-suiteOrdering =
+suitOrdering : Ordering Suit
+suitOrdering =
     Ordering.explicit [ Clubs, Hearts, Diamonds, Spades ]
 
 
@@ -51,7 +51,7 @@ valueOrdering =
 
 cardOrdering : Ordering Card
 cardOrdering =
-    Ordering.byFieldWith suiteOrdering .suite
+    Ordering.byFieldWith suitOrdering .suit
         |> Ordering.breakTiesWith (Ordering.byFieldWith valueOrdering .value)
 
 
@@ -65,8 +65,8 @@ oneOf items =
     Fuzz.frequency (List.map (\x -> ( 1, Fuzz.constant x )) items)
 
 
-suite : Fuzzer Suite
-suite =
+suit : Fuzzer Suit
+suit =
     oneOf [ Clubs, Hearts, Diamonds, Spades ]
 
 
@@ -77,7 +77,7 @@ value =
 
 card : Fuzzer Card
 card =
-    Fuzz.map2 Card value suite
+    Fuzz.map2 Card value suit
 
 
 deck : Fuzzer (List Card)
@@ -190,18 +190,18 @@ all =
             )
         , describe "explicit"
             [ test "ordered" <|
-                \_ -> expectOrdered suiteOrdering [ Clubs, Hearts, Diamonds, Spades ]
+                \_ -> expectOrdered suitOrdering [ Clubs, Hearts, Diamonds, Spades ]
             , test "equal" <|
                 \_ ->
-                    suiteOrdering Hearts Hearts
+                    suitOrdering Hearts Hearts
                         |> Expect.equal EQ
             , test "less than" <|
                 \_ ->
-                    suiteOrdering Hearts Spades
+                    suitOrdering Hearts Spades
                         |> Expect.equal LT
             , test "greater than" <|
                 \_ ->
-                    suiteOrdering Diamonds Clubs
+                    suitOrdering Diamonds Clubs
                         |> Expect.equal GT
             , let
                 orderedValues =
@@ -313,7 +313,7 @@ all =
                         (\x y ->
                             case ( x, y ) of
                                 ( NormalCard v1 s1, NormalCard v2 s2 ) ->
-                                    suiteOrdering s1 s2
+                                    suitOrdering s1 s2
                                         |> Ordering.ifStillTiedThen (valueOrdering v1 v2)
 
                                 _ ->
@@ -330,7 +330,7 @@ all =
                 \_ ->
                     sortCards [ Card Two Spades, Card King Diamonds ]
                         |> Expect.equal [ Card King Diamonds, Card Two Spades ]
-            , test "Cards in same suite are ordered" <|
+            , test "Cards in same suit are ordered" <|
                 \_ ->
                     sortCards [ Card Ten Spades, Card Four Hearts, Card Three Spades ]
                         |> Expect.equal [ Card Four Hearts, Card Three Spades, Card Ten Spades ]

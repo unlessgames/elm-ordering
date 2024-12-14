@@ -4,8 +4,8 @@ Library that makes it easier to write comparison functions in Elm.
 For instance, suppose you are defining a data type to represent
 a standard deck of cards. You might define it as:
 
-    type alias Card = { value : Value, suite : Suite }
-    type Suite = Clubs | Hearts | Diamonds | Spades
+    type alias Card = { value : Value, suit : Suit }
+    type Suit = Clubs | Hearts | Diamonds | Spades
     type Value = Two | Three | Four | Five | Six | Seven
                | Eight | Nine | Ten | Jack | Queen | King | Ace
 
@@ -16,13 +16,13 @@ With this representation, you could define an ordering for `Card` values composi
 
     cardOrdering : Ordering Card
     cardOrdering =
-        Ordering.byFieldWith suiteOrdering .suite
+        Ordering.byFieldWith suitOrdering .suit
             |> Ordering.breakTiesWith
                    (Ordering.byFieldWith valueOrdering .value)
 
 
-    suiteOrdering : Ordering Suite
-    suiteOrdering =
+    suitOrdering : Ordering Suit
+    suitOrdering =
         Ordering.explicit [Clubs, Hearts, Diamonds, Spades]
 
 

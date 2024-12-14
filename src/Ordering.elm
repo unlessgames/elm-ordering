@@ -21,8 +21,8 @@ This library makes it easy to create comparison functions for arbitary types by 
 smaller comparison functions. For instance, suppose you are defining a data type to represent
 a standard deck of cards. You might define it as:
 
-    type alias Card = { value : Value, suite : Suite }
-    type Suite = Clubs | Hearts | Diamonds | Spades
+    type alias Card = { value : Value, suit : Suit }
+    type Suit = Clubs | Hearts | Diamonds | Spades
     type Value = Two | Three | Four | Five | Six | Seven
                | Eight | Nine | Ten | Jack | Queen | King | Ace
 
@@ -33,13 +33,13 @@ With this representation, you could define an ordering for `Card` values composi
 
     cardOrdering : Ordering Card
     cardOrdering =
-        Ordering.byFieldWith suiteOrdering .suite
+        Ordering.byFieldWith suitOrdering .suit
             |> Ordering.breakTiesWith
                    (Ordering.byFieldWith valueOrdering .value)
 
 
-    suiteOrdering : Ordering Suite
-    suiteOrdering =
+    suitOrdering : Ordering Suit
+    suitOrdering =
         Ordering.explicit [Clubs, Hearts, Diamonds, Spades]
 
 
@@ -192,21 +192,21 @@ byField =
 field selected by the given function.
 
     cards =
-        [ { value = Two, suite = Spades }
-        , { value = King, suite = Hearts }
+        [ { value = Two, suit = Spades }
+        , { value = King, suit = Hearts }
         ]
 
     List.sort
         (Ordering.byFieldWith valueOrdering .value)
         cards
-        == [ { value = Two, suite = Spades }
-           , { value = King, suite = Hearts }
+        == [ { value = Two, suit = Spades }
+           , { value = King, suit = Hearts }
            ]
     List.sort
-        (Ordering.byFieldWith suiteOrdering .suite)
+        (Ordering.byFieldWith suitOrdering .suit)
         cards
-        == [ { value = King, suite = Hearts }
-           , { value = Two, suite = Spades }
+        == [ { value = King, suit = Hearts }
+           , { value = Two, suit = Spades }
            ]
 -}
 byFieldWith : Ordering b -> (a -> b) -> Ordering a
@@ -249,7 +249,7 @@ constructors for some or all of the cases take arguments. (Otherwise use `Orderi
 instead which has a simpler interface.) For instance, to make an ordering for
 a type such as:
 
-    type JokerCard = NormalCard Value Suite | Joker
+    type JokerCard = NormalCard Value Suit | Joker
 
 you could use `byRank` to sort all the normal cards before the jokers like so:
 
@@ -263,7 +263,7 @@ you could use `byRank` to sort all the normal cards before the jokers like so:
             (\x y ->
                  case (x, y) of
                      (NormalCard v1 s1, NormalCard v2 s2) ->
-                         suiteOrdering s1 s2
+                         suitOrdering s1 s2
                              |> Ordering.ifStillTiedThen
                                     (valueOrdering v1 v2)
                      _ -> Ordering.noConflicts)
